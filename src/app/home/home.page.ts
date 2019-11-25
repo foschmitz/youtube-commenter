@@ -8,11 +8,13 @@ import { UserService } from '.././user.service';
   styleUrls: ['home.page.scss'],
 })
 export class HomePage {
+  private subscribers : Array<any> = [];
+  private subscriptions : Array<any> = [];
 
   constructor(private userService : UserService, private youtubeService : YoutubeService) {
 
     if (this.userService.isUserSignedIn()) {
-      this.loadVideos()
+      this.loadVideos();
     }
   }
 
@@ -22,7 +24,7 @@ export class HomePage {
 
   public signIn() {
     this.userService.signIn().then(() => {
-      this.loadVideos()
+      this.loadVideos();
     });
   }
 
@@ -31,8 +33,34 @@ export class HomePage {
   }
 
   private loadVideos() {
-    this.youtubeService.getMySubscribers(50).subscribe((res) => {
-      console.log("MY SUBSCRIBERS", res);
+    this.getSubscribers(null);
+    this.getSubscriptions(null);
+  }
+
+  private getSubscribers(nextPageToken) {
+    this.youtubeService.getMySubscribers(50, nextPageToken).subscribe((res: any) => {
+      for (let i = 0; i< res.items.length; i++) {
+        this.subscribers.push(res.items[i].snippet.channelId)
+      }
+
+      if (res.nextPageToken) {
+        this.getSubscribers(res.nextPageToken);
+      }
+    })
+  }
+
+  private getSubscriptions(nextPageToken) {
+    this.youtubeService.getSubscriptions(50, nextPageToken).subscribe((res: any) => {
+
+      for (let i = 0; i< res.items.length; i++) {
+        this.subscriptions.push(res.items[i].snippet.resourceId.channelId)
+      }
+
+      if (res.nextPageToken) {
+        this.getSubscriptions(res.nextPageToken);
+      }
+
+      console.log(this.subscriptions);
     })
   }
 }

@@ -23,7 +23,7 @@ export class YoutubeService {
       }))
   }
 
-  public getMySubscribers(maxResults): Observable<Object> {
+  public getMySubscribers(maxResults, nextPageToken): Observable<Object> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Authorization': 'Bearer ' + this.userService.getToken(),
@@ -31,10 +31,7 @@ export class YoutubeService {
       })
     }
 
-
-    let url = CONFIGURATION.API_URL + '/subscriptions?key=' + CONFIGURATION.API_KEY + '&mySubscribers=true&part=snippet &maxResults=' + maxResults
-
-    console.log(httpOptions, url);
+    let url = CONFIGURATION.API_URL + '/subscriptions?key=' + CONFIGURATION.API_KEY + '&mySubscribers=true&part=snippet &maxResults=' + maxResults + (nextPageToken ? '&pageToken=' + nextPageToken : '');
 
     return this.http.get(url, httpOptions)
       .pipe(map((res) => {
@@ -42,11 +39,18 @@ export class YoutubeService {
       }))
   }
 
-  public getSubscriptions(maxResults): Observable<Object> {
-    let url = CONFIGURATION.API_URL + '/subscriptions?key=' + CONFIGURATION.API_KEY + '&mine=true&part=snippet &maxResults=' + maxResults
-    return this.http.get(url)
+  public getSubscriptions(maxResults, nextPageToken): Observable<Object> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Authorization': 'Bearer ' + this.userService.getToken(),
+        'Accept' : 'application/json'
+      })
+    }
+
+    let url = CONFIGURATION.API_URL + '/subscriptions?key=' + CONFIGURATION.API_KEY + '&mine=true&part=snippet &maxResults=' + maxResults + (nextPageToken ? '&pageToken=' + nextPageToken : '');
+    return this.http.get(url, httpOptions)
       .pipe(map((res : any) => {
-        return res.items;
+        return res;
       }))
   }
 
