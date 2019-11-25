@@ -1,0 +1,23 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>
+      Home
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-button *ngIf='!isLoggedIn()' (click)="signIn()">Sign in with Google</ion-button>
+  <ion-button *ngIf='isLoggedIn()' (click)="signOut()">Sign out</ion-button>
+
+  <div *ngIf='isLoggedIn()'>
+
+
+
+  </div>
+
+
+</ion-content>
