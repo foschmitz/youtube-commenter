@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { YoutubeService } from '.././yt.service';
 import { UserService } from '.././user.service';
+import { LoadingController } from '@ionic/angular';
 
 @Component({
   selector: 'app-home',
@@ -11,7 +12,7 @@ export class HomePage {
   private subscribers : Array<any> = [];
   private subscriptions : Array<any> = [];
 
-  constructor(private userService : UserService, private youtubeService : YoutubeService) {
+  constructor(public loadingController: LoadingController, private userService : UserService, private youtubeService : YoutubeService) {
 
     if (this.userService.isUserSignedIn()) {
       this.loadVideos();
@@ -32,9 +33,14 @@ export class HomePage {
     this.userService.signOut();
   }
 
-  private loadVideos() {
+  async loadVideos() {
+    const loading = await this.loadingController.create({
+      duration: 15000,
+      message: 'Please wait...'
+    });
+    await loading.present();
     this.getSubscribers(null);
-    this.getSubscriptions(null);
+    this.getSubscriptions(null, loading);
   }
 
   private getSubscribers(nextPageToken) {
@@ -49,7 +55,7 @@ export class HomePage {
     })
   }
 
-  private getSubscriptions(nextPageToken) {
+  private getSubscriptions(nextPageToken, loading) {
     this.youtubeService.getSubscriptions(50, nextPageToken).subscribe((res: any) => {
 
       for (let i = 0; i< res.items.length; i++) {
@@ -57,7 +63,9 @@ export class HomePage {
       }
 
       if (res.nextPageToken) {
-        this.getSubscriptions(res.nextPageToken);
+        this.getSubscriptions(res.nextPageToken, loading);
+      } else {
+        loading.dismiss();
       }
 
       console.log(this.subscriptions);
