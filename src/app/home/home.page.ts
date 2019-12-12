@@ -2,6 +2,9 @@ import { Component } from '@angular/core';
 import { YoutubeService } from '.././yt.service';
 import { UserService } from '.././user.service';
 import { LoadingController } from '@ionic/angular';
+import { takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { DomSanitizer } from '@angular/platform-browser';
 
 interface SubscriberPage {
   subscribers: Array<any>;
@@ -19,14 +22,20 @@ interface SubscriptionPage {
   styleUrls: ['home.page.scss'],
 })
 export class HomePage {
+  private pageLimit = 1;
   private subscribers : Array<any> = [];
   private subscriptions : SubscriptionPage = { 'subscriptions': [], 'nextPageToken' : null };
   public commentVideos : Array<any> = [];
+  private unsubscribe$: Subject<any> = new Subject();
 
-  constructor(public loadingController: LoadingController, private userService : UserService, private youtubeService : YoutubeService) {
+  constructor(public loadingController: LoadingController, private userService : UserService, private youtubeService : YoutubeService, private _sanitizer: DomSanitizer) {
     if (this.userService.isUserSignedIn()) {
       this.loadVideos();
     }
+  }
+
+  private getEmbedURL(videoId) {
+    return this._sanitizer.bypassSecurityTrustResourceUrl("https://www.youtube.com/embed/" + videoId);
   }
 
   private loadSubscriberPage(nextPageToken: string | null,): Promise<SubscriberPage> {
@@ -46,7 +55,7 @@ export class HomePage {
         console.log("in loadSubscriptionPage");
         return new Promise((resolve, reject) => {
           this.youtubeService
-            .getSubscriptions(50, nextPageToken)
+            .getSubscriptions(this.pageLimit, nextPageToken)
             .subscribe((res: any) => {
               resolve({
                 subscriptions: res.items.map((item: any) => item.snippet.resourceId.channelId),
@@ -70,14 +79,23 @@ export class HomePage {
       return subscribers;
     }
 
-    async getVideosToComment(subscriptions : SubscriptionPage, subscribers : Array<any>) : Promise<Array<any>>  {
+    public getVideosToComment(subscriptions : SubscriptionPage, subscribers : Array<any>)  {
       console.log("in getvids");
       const nonSubscribers: Array<any> = subscriptions.subscriptions.filter(function(item) {
         return !subscribers.includes(item);
       });
       console.log("NONSUBSCRIBERS: ", nonSubscribers);
-      const videos: Array<any> = [];
-      return videos;
+
+      for (var i = 0; i<nonSubscribers.length; i++) {
+        this.youtubeService.getVideosForChannel(nonSubscribers[i],1)
+        .pipe(takeUntil(this.unsubscribe$))
+        .subscribe(lista => {
+          for (let element of lista["items"]) {
+
+            this.commentVideos.push(element)
+          }
+        });
+      }
     };
 
   public isLoggedIn(): boolean {
@@ -103,11 +121,19 @@ async loadVideos() {
     });
     await loading.present();
 
-    this.subscribers = await this.loadAllSubscribers();
-    this.subscriptions = await this.loadSubscriptionPage(this.subscriptions.nextPageToken);
-    this.commentVideos = await this.getVideosToComment(this.subscriptions, this.subscribers);
+    try {
+      //    this.subscribers = await this.loadAllSubscribers();
+          this.subscriptions = await this.loadSubscriptionPage(this.subscriptions.nextPageToken);
+          this.getVideosToComment(this.subscriptions, this.subscribers);
+    } catch {
+        loading.dismiss();
+    } finally {
+        loading.dismiss();
+    }
 
-    loading.dismiss();
   }
 
+  private onComment(comment, videoId) {
+    console.log(comment, videoId);
+  }
 }

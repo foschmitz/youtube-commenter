@@ -15,7 +15,39 @@
 
   <div *ngIf='isLoggedIn()'>
 
+  <ion-card>
 
+    <ion-item>
+      <h2>Video Title</h2>
+    </ion-item>
+
+    <ion-item>
+      <iframe class="iframe-center" width="560" height="315" src="https://www.youtube.com/embed/kq9iEYg9yeA" frameborder="0" allowfullscreen></iframe>
+    </ion-item>
+
+    <ion-card-content>
+      <ion-input placeholder="Comment here" (ionBlur)='onComment($event.target.value, "videoId")'></ion-input>
+    </ion-card-content>
+  </ion-card>
+
+
+    <div *ngFor="let video of commentVideos" class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-0 shadow vh-50">
+        <a href="https://www.youtube.com/watch?v={{video.id.videoId}}" target="_blank">
+          <iframe width="560" height="315" src="'https://www.youtube.com/embed/' + {{video.id.videoId}}" frameborder="0" allowfullscreen></iframe>
+
+        <!--  <img [src]="video.snippet.thumbnails.medium.url" class="card-img-top" alt="...">
+          -->
+        </a>
+
+        <div class="card-body text-center">
+          <h5 class="card-title mb-0">
+            <a href="https://www.youtube.com/watch?v={{video.id.videoId}}">{{video.snippet.title}}
+            </a></h5>
+          <div class="card-text text-black-50">{{video.snippet.description.slice(0, 100)}}</div>
+         </div>
+      </div>
+    </div>
 
   </div>
 
