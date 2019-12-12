@@ -21,6 +21,22 @@ export class YoutubeService {
       }))
   }
 
+  public getCommentThreadsForVideo(videoId, maxResults): Observable<Object> {
+    let url = CONFIGURATION.API_URL + '/commentThreads/list?key=' + CONFIGURATION.API_KEY + '&videoId=' + videoId + '&part=snippet &maxResults=' + maxResults
+    return this.http.get(url)
+      .pipe(map((res) => {
+        return res;
+      }))
+  }
+
+  public searchCommentThreadsForVideo(searchTerms, maxResults): Observable<Object> {
+    let url = CONFIGURATION.API_URL + '/commentThreads/list?key=' + CONFIGURATION.API_KEY + '&searchTerms=' + searchTerms + '&part=snippet &maxResults=' + maxResults
+    return this.http.get(url)
+      .pipe(map((res) => {
+        return res;
+      }))
+  }
+  
   public getMySubscribers(maxResults, nextPageToken): Observable<Object> {
     const httpOptions = {
       headers: new HttpHeaders({

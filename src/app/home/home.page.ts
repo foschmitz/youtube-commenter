@@ -5,6 +5,7 @@ import { LoadingController } from '@ionic/angular';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { DomSanitizer } from '@angular/platform-browser';
+import { CONFIGURATION } from './../configuration';
 
 interface SubscriberPage {
   subscribers: Array<any>;
@@ -92,7 +93,12 @@ export class HomePage {
         .subscribe(lista => {
           for (let element of lista["items"]) {
 
-            this.commentVideos.push(element)
+            this.youtubeService.searchCommentThreadsForVideo(CONFIGURATION.USERNAME,100)
+              .subscribe((res) => {
+                if (!(res && res["items"].length > 0)) {
+                  this.commentVideos.push(element)
+                }
+              })
           }
         });
       }
