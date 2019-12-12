@@ -1,9 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, from, forkJoin, of } from 'rxjs';
-import { takeUntil, map, switchMap} from 'rxjs/operators';
-import { Subject } from 'rxjs';
-import * as _ from "lodash";
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { CONFIGURATION } from './configuration';
 import { HttpHeaders } from '@angular/common/http';
 import {UserService} from './user.service';
